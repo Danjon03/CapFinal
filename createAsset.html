@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+im not confident the js is optimized.
+needs confirmation that a template was saved/an asset was registered.
+-->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="../API_Functions/postRecords.js"></script>
+  <link rel="stylesheet" href="../sharedComponents/topBar.css" />
+
+  <title>Asset Menu</title>
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .top-title {
+      margin: 0;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .back-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px 12px;
+    }
+
+    .asset-button-row {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      background-color: #f4f4f4;
+      padding: 10px 0;
+      z-index: 999;
+      height: 40px;
+      border-bottom: 1px solid #b5b5b5;
+    }
+
+    .asset-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3e50d3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .asset-btn:hover {
+      background: #222e86;
+    }
+
+    #view-container {
+      padding: 20px;
+      padding-top: 130px;
+      height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+
+    .reset-btn {
+      all: unset;
+      cursor: pointer;
+      font-size: 22px;
+      text-align: center;
+      color: inherit;
+    }
+
+    .form-container {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    #template-title {
+      width: 100%;
+      font-size: 22px;
+      border: none;
+      outline: none;
+      border-bottom: 2px solid #ccc;
+    }
+
+    #template-title:focus {
+      border-bottom: 2px solid #222e86;
+    }
+
+    .new-field {
+      display: block;
+      margin: 10px;
+      width: 50%;
+    }
+
+    .new-field input {
+      flex: 1;
+      padding: 5px;
+      margin-right: 10px;
+      width: 50%;
+    }
+
+    .delete-button {
+      background: rgb(214, 24, 24);
+      color: white;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .delete-button:hover {
+      background: rgb(137, 15, 15);
+    }
+
+    #newField-btn,
+    #clearFields-btn,
+    #saveTemplate-btn {
+      margin-top: 10px;
+      margin-right: 10px;
+      padding: 8px 12px;
+      background-color: #3e50d3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #newField-btn:hover,
+    #clearFields-btn:hover,
+    #saveTemplate-btn:hover {
+      background-color: #222e86;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="top-bar-section left">
+      <button class="back-btn" onclick="window.location.href='../index.html'">← Back to Main Menu</button>
+    </div>
+
+    <div class="top-bar-section center">
+      <button class="top-title reset-btn" onclick="resetView()">Asset Menu</button>
+    </div>
+
+    <div class="top-bar-section right">
+      <button class="logout-btn">Log Out</button>
+    </div>
+  </div>
+
+  <div class="asset-button-row">
+    <button class="asset-btn" onclick="navigateTo('createAsset')">Register</button>
+    <button class="asset-btn" onclick="navigateTo('editAsset')">Edit</button>
+    <button class="asset-btn" onclick="navigateTo('fillAsset')">Fill</button>
+  </div>
+
+  <div id="view-container">
+
+    <div class="form-container">
+      <input type="text" id="template-title" placeholder="Enter asset name ">
+      <button id="newField-btn">Add New Field</button>
+      <button id="clearFields-btn">Clear All Fields</button>
+
+      <div id="field-container"></div>
+
+      <button id="saveTemplate-btn">Save Asset</button>
+    </div>
+
+  </div>
+
+  <script>
+    function navigateTo(page) {
+      window.location.href = page + ".html";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // DOM Elements
+      const titleInput = document.getElementById("template-title");
+      const addNewFieldButton = document.getElementById("newField-btn");
+      const fieldsContainer = document.getElementById("field-container");
+      const clearFieldsButton = document.getElementById("clearFields-btn");
+      const saveTemplateButton = document.getElementById("saveTemplate-btn");
+      const outputDisplay = document.getElementById("output");
+      const clearSavedButton = document.getElementById("clearSaved-btn");
+
+      // Load existing forms from local storage (if any)
+      let templateTitles = JSON.parse(localStorage.getItem("templateTitles")) || [];
+
+      // Function to update output display with stored templates
+      // function updateOutput() {
+      //     outputDisplay.textContent = JSON.stringify(templateTitles, null, 2);
+      // }
+
+      // Initial rendering of saved templates (if available)
+      //updateOutput();
+
+      // Function to add new input field dynamically
+      addNewFieldButton.addEventListener("click", function () {
+        const fieldCount = fieldsContainer.querySelectorAll(".new-field").length;
+
+        if (fieldCount >= 100) {
+          alert("You may register up to 100 assets at one time. To register more assets, first submit current entries.");
+          return;
+        }
+
+        // Create a container div to hold both input and delete button
+        const fieldWrapper = document.createElement("div");
+        fieldWrapper.classList.add("new-field");
+
+        // Create the input field
+        const newField = document.createElement("input");
+        newField.type = "text";
+        newField.placeholder = `Enter ${getOrdinal(fieldCount + 1)} Field Name`;
+
+        // Create the delete button
+        const deleteButton = document.createElement("button");
+        deleteButton.classList.add("delete-button");
+        deleteButton.textContent = "✕";
+
+        // Delete this field when delete button is clicked
+        deleteButton.addEventListener("click", function () {
+          fieldWrapper.remove();
+        });
+
+        // Add input and delete button to the wrapper
+        fieldWrapper.appendChild(newField);
+        fieldWrapper.appendChild(deleteButton);
+
+        // Add the wrapper to the field container
+        fieldsContainer.appendChild(fieldWrapper);
+      });
+
+
+      // Function to determine the correct ordinal suffix for numeric values (st, nd, rd, th)
+      function getOrdinal(n) {
+        const suffixes = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+      }
+
+      // Function to clear all fields
+      clearFieldsButton.addEventListener("click", function () {
+        fieldsContainer.innerHTML = "";
+      });
+
+      // Function to save template data
+      saveTemplateButton.addEventListener("click", function () {
+        const title = titleInput.value.trim();
+        const fieldValues = Array.from(fieldsContainer.querySelectorAll(".form-field"))
+          .map(field => field.value.trim())
+          .filter(value => value !== ""); // Remove empty fields
+
+        if (title || fieldValues.length > 0) {
+          let templateObject = {
+            title,
+            timestamp: new Date().toLocaleString(), // Store timestamp in readable format
+            userId: 0,
+            fieldValues
+          };
+
+          // Store template object
+          templateTitles.push(templateObject);
+          //updateOutput();
+          localStorage.setItem("templateTitles", JSON.stringify(templateTitles)); // Save to local storage
+
+          // Clear input fields
+          titleInput.value = "";
+          fieldsContainer.innerHTML = "";
+
+          // Send data to API
+          postTemplate(templateObject);
+        }
+      });
+
+      // Function to clear saved templates
+      // clearSavedButton.addEventListener("click", function () {
+      //     localStorage.removeItem("templateTitles"); // Remove from local storage
+      //     templateTitles = []; // Reset array
+      //     updateOutput(); // Update display
+      // });
+    });
+
+
+
+
+
+
+
+
+
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+ placeholder needs more detailed instructions.
+ fix placeholder view
+-->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asset Menu</title>
+
+  <link rel="stylesheet" href="../sharedComponents/topBar.css" />
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .top-title {
+      margin: 0;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .back-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px 12px;
+    }
+
+    .asset-button-row {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      background-color: #f4f4f4;
+      padding: 10px 0;
+      z-index: 999;
+      height: 40px;
+      border-bottom: 1px solid #b5b5b5;
+    }
+
+    .asset-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3e50d3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .asset-btn:hover {
+      background: #222e86;
+    }
+
+    #view-container {
+      padding: 20px;
+      padding-top: 130px;
+      height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+
+    .placeholder-message {
+      text-align: center;
+      margin-top: 50px;
+      color: #444;
+    }
+
+    .placeholder-message h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .placeholder-message p {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .reset-btn {
+      all: unset;
+      cursor: pointer;
+      font-size: 22px;
+      text-align: center;
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="top-bar-section left">
+      <button class="back-btn" onclick="window.location.href='../index.html'">← Back to Main Menu</button>
+    </div>
+
+    <div class="top-bar-section center">
+      <button class="top-title reset-btn" onclick="resetView()">Asset Menu</button>
+    </div>
+
+    <div class="top-bar-section right">
+      <button class="logout-btn">Log Out</button>
+    </div>
+  </div>
+
+  <div class="asset-button-row">
+    <button class="asset-btn" onclick="navigateTo('createAsset')">Register</button>
+    <button class="asset-btn" onclick="navigateTo('editAsset')">Edit</button>
+    <button class="asset-btn" onclick="navigateTo('fillAsset')">Fill</button>
+  </div>
+
+  <div id="view-container">
+    <div class="placeholder-message">
+      <h2>Welcome to the Asset Menu</h2>
+      <p>An asset is something static you want to track information about. Register an asset
+        and create a template to get started!</p>
+    </div>
+  </div>
+
+  <script>
+    function navigateTo(page) {
+      window.location.href = page + ".html";
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+ css still needs to be fixed. 
+ need to add "add new field" button
+ selecting a form doesnt pull up it's fields (need to be fixed)
+-->
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="../API_Functions/postRecords.js"></script>
+    <link rel="stylesheet" href="../sharedComponents/topBar.css" />
+
+    <title>Asset Menu</title>
+    <style>
+        /* Base reset */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .top-title {
+      margin: 0;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .back-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px 12px;
+    }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        /* Section buttons row */
+        .asset-button-row {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      background-color: #f4f4f4;
+      padding: 10px 0;
+      z-index: 999;
+      height: 40px;
+      border-bottom: 1px solid #b5b5b5;
+    }
+
+    .asset-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3e50d3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .asset-btn:hover {
+      background: #222e86;
+    }
+
+        /* Main view container below navbars */
+        #view-container {
+      padding: 20px;
+      padding-top: 130px;
+      height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+
+    .reset-btn {
+      all: unset;
+      cursor: pointer;
+      font-size: 22px;
+      text-align: center;
+      color: inherit;
+    }
+
+        /* Edit mode controls */
+        .edit-controls {
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .edit-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .edit-controls select {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* Edit form area */
+        #editFormArea {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #editFormArea h3 {
+            margin-top: 0;
+        }
+
+        /* Each field entry */
+        .field-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .field-entry input {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .field-entry button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .field-entry button:hover {
+            background: #a71d2a;
+        }
+
+        /* Action buttons at bottom of editor */
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .edit-actions button {
+            padding: 10px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .edit-actions .save {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .edit-actions .save:hover {
+            background: #0056b3;
+        }
+
+        .edit-actions .delete {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .edit-actions .delete:hover {
+            background: #a71d2a;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="top-bar-section left">
+          <button class="back-btn" onclick="window.location.href='../index.html'">← Back to Main Menu</button>
+        </div>
+    
+        <div class="top-bar-section center">
+          <button class="top-title reset-btn" onclick="resetView()">Asset Menu</button>
+        </div>
+    
+        <div class="top-bar-section right">
+          <button class="logout-btn">Log Out</button>
+        </div>
+      </div>
+
+    <div class="asset-button-row">
+        <button class="asset-btn" onclick="navigateTo('createAsset')">Register</button>
+        <button class="asset-btn" onclick="navigateTo('editAsset')">Edit</button>
+        <button class="asset-btn" onclick="navigateTo('fillAsset')">Fill</button>
+    </div>
+
+    <div id="view-container">
+        <!-- Form selector -->
+        <div class="edit-controls">
+            <label for="formSelector">Select a Form to Edit:</label>
+            <select id="formSelector">
+                <option value="">-- Select a Form --</option>
+            </select>
+        </div>
+        <!-- Dynamic edit area -->
+        <div id="editFormArea"></div>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = page + ".html";
+        }
+
+        let templates = {};
+        async function getAllTemplates() {
+            return await getTemplates();
+        }
+        function buildTemplateMap(arr) {
+            const m = {};
+            arr.forEach(t => m[t._id] = t);
+            return m;
+        }
+        function populateSelector(map) {
+            const sel = document.getElementById('formSelector');
+            sel.innerHTML = '<option value="">-- Select a Form --</option>';
+            Object.values(map).forEach(t => {
+                const o = document.createElement('option');
+                o.value = t._id; o.textContent = t.title;
+                sel.appendChild(o);
+            });
+        }
+        function addEditField(container, val = '') {
+            const div = document.createElement('div'); div.className = 'field-entry';
+            const inp = document.createElement('input'); inp.type = 'text'; inp.value = val; inp.placeholder = 'Field title';
+            const del = document.createElement('button'); del.textContent = 'X';
+            del.onclick = () => div.remove();
+            div.append(inp, del); container.append(div);
+        }
+        function editForm(id) {
+            const area = document.getElementById('editFormArea');
+            const tpl = templates[id]; area.innerHTML = `<h3>Editing: ${tpl.title}</h3>`;
+            const list = document.createElement('div'); list.id = 'editFields';
+            tpl.fieldValues.forEach(f => addEditField(list, f)); area.append(list);
+
+            const actions = document.createElement('div'); actions.className = 'edit-actions';
+            const save = document.createElement('button'); save.className = 'save'; save.textContent = 'Save Changes';
+            save.onclick = () => { saveNewForm(); };
+            const delBtn = document.createElement('button'); delBtn.className = 'delete'; delBtn.textContent = 'Delete This Form';
+            delBtn.onclick = () => { if (confirm(`Delete "${tpl.title}"?`)) { delete templates[id]; localStorage.setItem('formTemplates', JSON.stringify(templates)); location.reload(); } };
+            area.append(actions); actions.append(save, delBtn);
+        }
+        function saveNewForm() {
+            const id = document.getElementById('formSelector').value;
+            const title = document.querySelector('#editFormArea h3').textContent.replace('Editing: ', '');
+            const fields = [...document.querySelectorAll('#editFields input')].map(i => i.value.trim()).filter(Boolean);
+            updateTemplate(id, { title, timestamp: new Date().toLocaleString(), userId: 0, fieldValues: fields });
+        }
+        window.onload = async () => {
+            const arr = await getAllTemplates();
+            templates = buildTemplateMap(arr);
+            populateSelector(templates);
+            document.getElementById('formSelector').onchange = e => {
+                if (e.target.value) editForm(e.target.value);
+                else document.getElementById('editFormArea').innerHTML = '';
+            };
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+username injection at the top of the page doesnt work.
+needs placeholder with instructions on what the program is.
+log out button needs functionality
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Page</title>
+
+    <link rel="stylesheet" href="sharedComponents/topBar.css">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .top-title {
+            font-size: 22px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .content {
+            position: fixed;
+            top: 70px;
+            /* matches height of top-bar */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* removes scrolling */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: center;
+        }
+
+        .menu-btn {
+            width: 250px;
+            padding: 15px 20px;
+            font-size: 18px;
+            background-color: #222e86;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .menu-btn:hover {
+            background-color: #3e50d3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="top-bar-section left"></div>
+
+        <div class="top-bar-section center">
+            <p class="top-title">Welcome <span id="username">[User]!</span></p>
+        </div>
+
+        <div class="top-bar-section right">
+            <button class="logout-btn">Log Out</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="button-container">
+            <button class="menu-btn" onclick="navigateTo('assets')">Assets</button>
+            <button class="menu-btn" onclick="navigateTo('metrics')">Metrics</button>
+            <button class="menu-btn" onclick="navigateTo('History')">History</button>
+            <button class="menu-btn" onclick="navigateTo('admin')">Admin</button>
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Grab the span
+            const usernameSpan = document.getElementById('username');
+            // 2. Define the new name you want to show
+            let storedValue = localStorage.getItem("loggedInUserID");
+            storedValue = JSON.parse(storedValue);
+            const newName = storedValue.firstName;    // ← change this to whatever you like
+            console.log(storedValue);
+            // 3. Update the span’s text
+            usernameSpan.textContent = newName;
+        });
+
+        function navigateTo(page) {
+            window.location.href = page + "/" + page + ".html";
+        }
+    </script>
+</body>
+
+</html>
